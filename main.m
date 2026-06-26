@@ -65,3 +65,57 @@ end
 figure;
 imshow(uint8(A));
 title('Citra MRI Asli');
+
+%% ==========
+%% Bagian 4
+%% =========
+
+%% Membaca citra MRI
+img = double(imread("/MATLAB Drive/MRI MTK SD.png"));
+
+%% Cek lagi jika punya 3 channel (RGB) ubah ke grayscale
+if size(img, 3) == 3
+    img = rgb2gray(img);
+end
+A = double(img);
+
+%% Singular Value Decomposition
+[U,S,V] = svd(A);
+
+%% Aproksimasi rank-10
+k = 10;
+A10 = U(:,1:k) * S(1:k,1:k) * V(:,1:k)';
+k = 10;
+error_numerik = norm(A-A10,'fro');
+sigma = diag(S);
+error_teori = sqrt(sum(sigma(k+1:end).^2));
+fprintf("Error teori   = %.6f\n",error_teori);
+fprintf("Error numerik = %.6f\n",error_numerik); 
+
+
+%% Error Frobenius hasil SVD
+error_svd = norm(A - A10,'fro');
+fprintf('Error Frobenius (SVD) = %.4f\n', error_svd);
+
+%% Membuat matriks rank-10 pembanding
+B = rand(size(A,1),k) * rand(k,size(A,2));
+error_random = norm(A - B,'fro');
+fprintf('Error Frobenius (Random Rank-10) = %.4f\n', error_random);
+
+%% Kesimpulan otomatis
+if error_svd < error_random
+    fprintf('\nHasil SVD memberikan error yang lebih kecil.\n');
+    fprintf('Teorema Eckart-Young terverifikasi.\n');
+else
+    fprintf('\nPerlu dilakukan pengujian ulang.\n');
+end
+
+%% Menampilkan gambar
+figure;
+subplot(1,2,1);
+imshow(uint8(A));
+title('MRI Asli');
+
+subplot(1,2,2);
+imshow(uint8(A10));
+title('Rekonstruksi Rank-10');
