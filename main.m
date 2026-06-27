@@ -252,6 +252,206 @@ imshow(A10, [])
 title('Rekonstruksi Rank-10');
 
 %% ==========
+%% BAGIAN 5
+%% ==========
+
+%% Membaca citra MRI
+img = imread('MRI MTK SD.png');
+
+% Jika RGB ubah ke grayscale
+if size(img,3)==3
+    img = rgb2gray(img);
+end
+
+img = double(img);
+
+%% Membuat koordinat piksel
+[x,y] = meshgrid(1:size(img,2),1:size(img,1));
+
+%% Parameter noise
+A = 20;
+wx = 0.2;
+wy = 0.2;
+
+%% Model noise sinusoidal
+f = A*sin(wx*x).*sin(wy*y);
+
+%% Menambahkan noise ke MRI
+img_noise = img + f;
+
+%% Turunan parsial pertama terhadap x
+dfdx = A*wx*cos(wx*x).*sin(wy*y);
+
+%% Turunan kedua terhadap x
+d2fdx2 = -A*(wx^2)*sin(wx*x).*sin(wy*y);
+
+%% Turunan parsial pertama terhadap y
+dfdy = A*wy*sin(wx*x).*cos(wy*y);
+
+%% Magnitude gradien
+grad = sqrt(dfdx.^2 + dfdy.^2);
+
+%% Menampilkan MRI asli
+figure;
+imshow(uint8(img));
+title('MRI Asli');
+
+%% Menampilkan noise sinusoidal
+figure;
+imshow(f,[]);
+title('Noise Sinusoidal');
+
+%% Menampilkan MRI + Noise
+figure;
+imshow(img_noise,[]);
+title('MRI + Noise');
+
+%% Menampilkan turunan parsial df/dx
+figure;
+imshow(dfdx,[]);
+title('Turunan Parsial df/dx');
+
+%% Menampilkan turunan kedua d2f/dx2
+figure;
+imshow(d2fdx2,[]);
+title('Turunan Kedua d2f/dx2');
+
+%% Menampilkan magnitude gradien
+figure;
+imshow(grad,[]);
+title('Magnitude Gradien');
+
+%% ==========
+%% Bagian 6
+%% ==========
+
+%% Membaca citra MRI
+img = imread('MRI MTK SD.png');
+
+if size(img,3)==3
+    img = rgb2gray(img);
+end
+
+img = double(img);
+
+%% Menentukan ROI
+ROI = img(80:180,80:180);
+
+%% Menampilkan ROI
+figure;
+imshow(uint8(ROI));
+title('Region of Interest (ROI)');
+
+%% Membuat koordinat
+[x,y] = meshgrid(1:size(ROI,2),1:size(ROI,1));
+
+%% Parameter noise
+A = 20;
+wx = 0.2;
+wy = 0.2;
+
+%% Fungsi noise
+f = A*sin(wx*x).*sin(wy*y);
+
+%% Visualisasi fungsi noise
+figure;
+imshow(f,[]);
+title('Fungsi Noise f(x,y)');
+
+%% METODE RIEMANN
+
+IR = sum(f(:));
+
+%% METODE TRAPEZOID
+
+IT = trapz(trapz(f));
+
+%% METODE SIMPSON
+
+temp = zeros(size(f,1),1);
+
+for i = 1:size(f,1)
+
+    baris = f(i,:);
+
+    n = length(baris);
+
+    if mod(n-1,2)~=0
+        baris = baris(1:end-1);
+        n = n-1;
+    end
+
+    h = 1;
+
+    hasil = baris(1) + baris(end);
+
+    for j = 2:n-1
+        if mod(j,2)==0
+            hasil = hasil + 4*baris(j);
+        else
+            hasil = hasil + 2*baris(j);
+        end
+    end
+
+    temp(i) = h/3 * hasil;
+
+end
+
+n = length(temp);
+
+if mod(n-1,2)~=0
+    temp = temp(1:end-1);
+    n = n-1;
+end
+
+hasil = temp(1) + temp(end);
+
+for i = 2:n-1
+    if mod(i,2)==0
+        hasil = hasil + 4*temp(i);
+    else
+        hasil = hasil + 2*temp(i);
+    end
+end
+
+IS = (1/3)*hasil;
+
+%% HASIL
+
+fprintf('\n');
+fprintf('=============================\n');
+fprintf('HASIL INTEGRAL NUMERIK\n');
+fprintf('=============================\n');
+fprintf('Riemann    = %.4f\n',IR);
+fprintf('Trapezoid  = %.4f\n',IT);
+fprintf('Simpson    = %.4f\n',IS);
+fprintf('=============================\n');
+
+%% Analisis Konvergensi
+
+selisih_RT = abs(IR-IT);
+selisih_TS = abs(IT-IS);
+
+fprintf('\n');
+fprintf('Selisih Riemann-Trapezoid = %.4f\n',selisih_RT);
+fprintf('Selisih Trapezoid-Simpson = %.4f\n',selisih_TS);
+
+%% Grafik Perbandingan
+
+nilai = [IR IT IS];
+
+figure;
+bar(nilai);
+
+set(gca,'XTickLabel',{'Riemann','Trapezoid','Simpson'});
+
+ylabel('Nilai Integral');
+
+title('Perbandingan Metode Integral Numerik');
+
+grid on;
+
+%% ==========
 %% Bagian 7
 %% ==========
 
