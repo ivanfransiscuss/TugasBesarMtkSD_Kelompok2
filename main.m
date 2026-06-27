@@ -4,6 +4,124 @@ clear;
 close all;
 
 %% ==========
+%% BAGIAN 1
+%% ==========
+
+% load mri
+img = imread('MRI MTK SD.png');
+
+% jika RGB ubah menjadi grayscale
+if size(img,3) == 3
+    img = rgb2gray(img);
+end
+
+% konversi ke double
+A = double(img);
+
+fprintf('Ukuran Matriks A = %d x %d\n', size(A,1), size(A,2));
+
+% verifikasi Rank
+r = rank(A);
+
+fprintf('Rank(A) = %d\n', r);
+
+% ambil submatriks 4x4
+A4 = A(100:103,100:103);
+
+disp('Submatriks 4x4 :');
+disp(A4);
+
+% determinan 
+detA4 = det(A4);
+
+fprintf('Determinan A4 = %.0f\n', detA4);
+
+%% ==========
+%% BAGIAN 2
+%% ==========
+
+% load mri
+img = imread('MRI MTK SD.png');
+
+if size(img,3) == 3
+    img = rgb2gray(img);
+end
+
+A = double(img);
+
+% ambil submatriks 3x3
+B = A(95:97,96:98);
+
+disp('Submatriks B = ');
+disp(B);
+
+% determinan Manual
+detB = ...
+    B(1,1)*(B(2,2)*B(3,3)-B(2,3)*B(3,2)) ...
+    - B(1,2)*(B(2,1)*B(3,3)-B(2,3)*B(3,1)) ...
+    + B(1,3)*(B(2,1)*B(3,2)-B(2,2)*B(3,1));
+
+fprintf('Determinan B = %.0f\n', detB);
+
+% matriks Kofaktor
+
+C11 = det([69 71;73 76]);
+C12 = -det([56 71;59 76]);
+C13 = det([56 69;59 73]);
+
+C21 = -det([61 70;73 76]);
+C22 = det([52 70;59 76]);
+C23 = -det([52 61;59 73]);
+
+C31 = det([61 70;69 71]);
+C32 = -det([52 70;56 71]);
+C33 = det([52 61;56 69]);
+
+C = [C11 C12 C13;
+    C21 C22 C23;
+    C31 C32 C33];
+
+disp('Matriks Kofaktor = ');
+disp(C);
+
+% matriks Adjoin
+adjB = C';
+
+disp('Matriks Adjoin = ');
+disp(adjB);
+
+% invers Metode Adjoin
+
+Binv = (1/detB)*adjB;
+
+disp('Invers B = ');
+disp(Binv);
+
+% verifikasi
+
+Itest = B*Binv;
+
+disp('B * B^-1 = ');
+disp(Itest);
+
+% error numerik
+
+err = norm(Itest-eye(3),'fro');
+
+fprintf('Error Frobenius = %.4e\n',err);
+
+% bandingkan dengan inv()
+
+Binv_matlab = inv(B);
+
+disp('Invers MATLAB = ');
+disp(Binv_matlab);
+
+selisih = norm(Binv-Binv_matlab,'fro');
+
+fprintf('Selisih terhadap inv() = %.4e\n',selisih);
+
+%% ==========
 %% Bagian 3
 %% ==========
 
