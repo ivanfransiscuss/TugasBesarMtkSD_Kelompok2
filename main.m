@@ -237,3 +237,59 @@ title('MRI Asli');
 subplot(1,2,2)
 imshow(A10, [])
 title('Rekonstruksi Rank-10');
+
+%% ==========
+%% Bagian 7
+%% ==========
+
+%% Membaca citra MRI
+A = imread('MRI_MTK_SD.png');
+if ndims(A) == 3
+   A = rgb2gray(A);
+end
+A = double(A);
+
+%% SVD
+[U,S,V] = svd(A);
+
+%% Norma Frobenius citra asli
+normA = norm(A,'fro');
+
+%% Rank maksimum matriks
+r = rank(A);
+
+%% Menghitung error relatif
+errorRelatif = zeros(r,1);
+for k = 1:r
+   Ak = U(:,1:k) * S(1:k,1:k) * V(:,1:k)';
+   errorRelatif(k) = norm(A-Ak,'fro') / normA;
+end
+
+%% Menentukan nilai k
+k10 = find(errorRelatif < 0.10,1,'first');
+k5  = find(errorRelatif < 0.05,1,'first');
+k1  = find(errorRelatif < 0.01,1,'first');
+
+%% Menampilkan hasil
+fprintf('=====================================\n');
+fprintf('Hasil Analisis Konvergensi\n');
+fprintf('=====================================\n\n');
+fprintf('Error relatif < 10%% dicapai pada k = %d\n',k10);
+fprintf('Error relatif < 5%%  dicapai pada k = %d\n',k5);
+fprintf('Error relatif < 1%%  dicapai pada k = %d\n',k1);
+
+%% Grafik Konvergensi
+figure;
+plot(1:r,errorRelatif,'LineWidth',2);
+hold on;
+yline(0.10,'--');
+yline(0.05,'--');
+yline(0.01,'--');
+plot(k10,errorRelatif(k10),'o');
+plot(k5,errorRelatif(k5),'o');
+plot(k1,errorRelatif(k1),'o');
+grid on;
+xlabel('Nilai k');
+ylabel('Error Relatif');
+title('Konvergensi Error Relatif Aproksimasi SVD');
+legend('Error Relatif','10%','5%','1%');
