@@ -189,13 +189,13 @@ title('Citra MRI Asli');
 %% =========
 
 %% Membaca citra MRI
-img = double(imread("/MATLAB Drive/MRI MTK SD.png"));
+img = imread("/MATLAB Drive/MRI MTK SD.png");
 
 %% Cek lagi jika punya 3 channel (RGB) ubah ke grayscale
-if size(img, 3) == 3
+if ndims(img) == 3
     img = rgb2gray(img);
 end
-A = double(img);
+A = im2double(img);
 
 %% Singular Value Decomposition
 [U,S,V] = svd(A);
@@ -230,10 +230,10 @@ end
 
 %% Menampilkan gambar
 figure;
-subplot(1,2,1);
-imshow(uint8(A));
+subplot(1,2,1)
+imshow(A, [])
 title('MRI Asli');
 
-subplot(1,2,2);
-imshow(uint8(A10));
+subplot(1,2,2)
+imshow(A10, [])
 title('Rekonstruksi Rank-10');
