@@ -126,7 +126,7 @@ fprintf('Selisih terhadap inv() = %.4e\n',selisih);
 %% ==========
 
 %% Gambar MRI menjadi matriks A
-A = double(imread('MRI_MTK_SD.png'));
+A = double(imread('MRI MTK SD.png'));
 
 % Mengubah gambar ke grayscale
 if ndims(A) == 3
@@ -172,7 +172,15 @@ for idx = 1:length(k_values)
    sigy2 = var(Ak(:));
    C = cov(A(:),Ak(:));
    sigxy = C(1,2);
-   
+
+   %% Konstanta stabilitas SSIM (Standar pengolahan citra)
+   L = 255;
+   C1 = (0.01 * L)^2;
+   C2 = (0.03 * L)^2;
+
+   %% Rumus SSIM 
+   ssim_value = ((2 * mux * muy + C1) * (2 * sigxy + C2)) / ((mux^2 + muy^2 + C1) * (sigx2 + sigy2 + C2));
+
    %% Menampilkan hasil utama
    fprintf('%d\t%.4f\t\t%.4f\t\t%.4f\n', ...
            k,CR,rmse,psnr_value);
@@ -184,6 +192,7 @@ for idx = 1:length(k_values)
    fprintf('Variance Original         = %.6f\n',sigx2);
    fprintf('Variance Rekonstruksi     = %.6f\n',sigy2);
    fprintf('Covariance                = %.6f\n',sigxy);
+   fprintf('Nilai Akhir SSIM          = %.6f\n',ssim_value);
    fprintf('========================================\n\n');
    
    %% Menampilkan citra hasil rekonstruksi
@@ -202,13 +211,12 @@ title('Citra MRI Asli');
 %% =========
 
 %% Membaca citra MRI
-img = imread("/MATLAB Drive/MRI MTK SD.png");
-
+A = imread('MRI MTK SD.png');
 %% Cek lagi jika punya 3 channel (RGB) ubah ke grayscale
-if ndims(img) == 3
-    img = rgb2gray(img);
+if ndims(A) == 3
+    A = rgb2gray(A);
 end
-A = im2double(img);
+A = double(A);
 
 %% Singular Value Decomposition
 [U,S,V] = svd(A);
@@ -256,44 +264,44 @@ title('Rekonstruksi Rank-10');
 %% ==========
 
 %% Membaca citra MRI
-img = imread('MRI MTK SD.png');
+A = imread('MRI MTK SD.png');
 
 % Jika RGB ubah ke grayscale
-if size(img,3)==3
-    img = rgb2gray(img);
+if size(A,3)==3
+    A = rgb2gray(A);
 end
 
-img = double(img);
+A = double(A);
 
 %% Membuat koordinat piksel
-[x,y] = meshgrid(1:size(img,2),1:size(img,1));
+[x,y] = meshgrid(1:size(A,2),1:size(A,1));
 
 %% Parameter noise
-A = 20;
+Amp = 20;
 wx = 0.2;
 wy = 0.2;
 
 %% Model noise sinusoidal
-f = A*sin(wx*x).*sin(wy*y);
+f = Amp*sin(wx*x).*sin(wy*y);
 
 %% Menambahkan noise ke MRI
-img_noise = img + f;
+A_noise = A + f;
 
 %% Turunan parsial pertama terhadap x
-dfdx = A*wx*cos(wx*x).*sin(wy*y);
+dfdx = Amp*wx*cos(wx*x).*sin(wy*y);
 
 %% Turunan kedua terhadap x
-d2fdx2 = -A*(wx^2)*sin(wx*x).*sin(wy*y);
+d2fdx2 = -Amp*(wx^2)*sin(wx*x).*sin(wy*y);
 
 %% Turunan parsial pertama terhadap y
-dfdy = A*wy*sin(wx*x).*cos(wy*y);
+dfdy = Amp*wy*sin(wx*x).*cos(wy*y);
 
 %% Magnitude gradien
 grad = sqrt(dfdx.^2 + dfdy.^2);
 
 %% Menampilkan MRI asli
 figure;
-imshow(uint8(img));
+imshow(uint8(A));
 title('MRI Asli');
 
 %% Menampilkan noise sinusoidal
@@ -303,7 +311,7 @@ title('Noise Sinusoidal');
 
 %% Menampilkan MRI + Noise
 figure;
-imshow(img_noise,[]);
+imshow(A_noise,[]);
 title('MRI + Noise');
 
 %% Menampilkan turunan parsial df/dx
@@ -326,16 +334,16 @@ title('Magnitude Gradien');
 %% ==========
 
 %% Membaca citra MRI
-img = imread('MRI MTK SD.png');
+A = imread('MRI MTK SD.png');
 
-if size(img,3)==3
-    img = rgb2gray(img);
+if size(A,3)==3
+    A = rgb2gray(A);
 end
 
-img = double(img);
+A = double(A);
 
 %% Menentukan ROI
-ROI = img(80:180,80:180);
+ROI = A(80:180,80:180);
 
 %% Menampilkan ROI
 figure;
@@ -346,12 +354,12 @@ title('Region of Interest (ROI)');
 [x,y] = meshgrid(1:size(ROI,2),1:size(ROI,1));
 
 %% Parameter noise
-A = 20;
+Amp = 20;
 wx = 0.2;
 wy = 0.2;
 
 %% Fungsi noise
-f = A*sin(wx*x).*sin(wy*y);
+f = Amp*sin(wx*x).*sin(wy*y);
 
 %% Visualisasi fungsi noise
 figure;
@@ -456,7 +464,7 @@ grid on;
 %% ==========
 
 %% Membaca citra MRI
-A = imread('MRI_MTK_SD.png');
+A = imread('MRI MTK SD.png');
 if ndims(A) == 3
    A = rgb2gray(A);
 end
