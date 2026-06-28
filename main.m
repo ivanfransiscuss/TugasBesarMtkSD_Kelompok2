@@ -110,17 +110,6 @@ err = norm(Itest-eye(3),'fro');
 
 fprintf('Error Frobenius = %.4e\n',err);
 
-% bandingkan dengan inv()
-
-Binv_matlab = inv(B);
-
-disp('Invers MATLAB = ');
-disp(Binv_matlab);
-
-selisih = norm(Binv-Binv_matlab,'fro');
-
-fprintf('Selisih terhadap inv() = %.4e\n',selisih);
-
 %% ==========
 %% Bagian 3
 %% ==========
